@@ -2,6 +2,7 @@ const knex = require('./db')
 
 function getAllGlasses () {
   // Return everything from the `glasses` table
+  return knex('glasses')
 }
 
 function getAllGlassesWithCocktails () {
@@ -9,6 +10,8 @@ function getAllGlassesWithCocktails () {
     Join glasses with cocktails -- do not worry about
     nesting the data in a particular way
   */
+  return knex('glasses')
+    .join('cocktails', 'cocktails.glass_id', 'glasses.id')
 }
 
 function getAllGlassesWithCocktailsNested () {
@@ -24,6 +27,19 @@ function getAllGlassesWithCocktailsNested () {
       ]
     }
   */
+
+  return knex('glasses')
+    .then(glasses => {
+      const promises = glasses.map(glass => {
+        return knex('cocktails').where({ glass_id: glass.id })
+          .then(cocktails => {
+            glass.cocktails = cocktails
+            return glass
+          })
+      })
+
+      return Promise.all(promises)
+    })
 }
 
 function getCocktailsAndIngredients () {
@@ -31,6 +47,10 @@ function getCocktailsAndIngredients () {
     Join glasses with cocktails via the join table -- do not
     worry about nesting the data in a particular way
   */
+
+  return knex('cocktails')
+    .join('cocktails_ingredients', 'cocktails_ingredients.cocktail_id', 'cocktails.id')
+    .join('ingredients', 'cocktails_ingredients.ingredient_id', 'ingredients.id')
 }
 
 function getCocktailsWithNestedIngredients () {
@@ -49,6 +69,21 @@ function getCocktailsWithNestedIngredients () {
       { ... }
     ]
   */
+
+  return knex('cocktails')
+    .then(cocktails => {
+      const promises = cocktails.map(cocktail => {
+        return knex('cocktails_ingredients')
+          .join('ingredients', 'ingredients.id', 'cocktails_ingredients.ingredient_id')
+          .where('cocktails_ingredients.cocktail_id', cocktail.id)
+          .then(ingredients => {
+            cocktail.ingredients = ingredients
+            return cocktail
+          })
+      })
+
+      return Promise.all(promises)
+    })
 }
 
 function getCocktailsWithNestedIngredientsAndGlass () {
@@ -72,6 +107,24 @@ function getCocktailsWithNestedIngredientsAndGlass () {
       { ... }
     ]
   */
+
+  return knex('cocktails')
+    .then(cocktails => {
+      const promises = cocktails.map(cocktail => {
+        return knex('cocktails_ingredients')
+          .join('ingredients', 'ingredients.id', 'cocktails_ingredients.ingredient_id')
+          .where('cocktails_ingredients.cocktail_id', cocktail.id)
+          .then(ingredients => {
+            cocktail.ingredients = ingredients
+            return knex('glasses').where({ id: cocktail.glass_id }).first().then(glass => {
+              cocktail.glass = glass
+              return cocktail
+            })
+          })
+      })
+
+      return Promise.all(promises)
+    })
 }
 
 module.exports = {
