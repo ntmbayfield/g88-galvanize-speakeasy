@@ -2,6 +2,9 @@ const knex = require('./db')
 
 function getAllGlasses () {
   // Return everything from the `glasses` table
+  knex
+    .select('name')
+    .table('books')
 }
 
 function getAllGlassesWithCocktails () {
