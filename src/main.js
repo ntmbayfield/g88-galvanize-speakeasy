@@ -1,10 +1,10 @@
-const knex = require('./db')
+const knex = require('./db');
+
 
 function getAllGlasses () {
   // Return everything from the `glasses` table
   knex
-    .select('name')
-    .table('books')
+    .select('glassses');
 }
 
 function getAllGlassesWithCocktails () {
@@ -12,6 +12,10 @@ function getAllGlassesWithCocktails () {
     Join glasses with cocktails -- do not worry about
     nesting the data in a particular way
   */
+  knex
+    .select('*')
+    .table('glasses')
+    .leftJoin('cocktails', 'glasses.id', 'cockyails.id')
 }
 
 function getAllGlassesWithCocktailsNested () {
