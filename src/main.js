@@ -3,7 +3,9 @@ const knex = require('./db');
 
 function getAllGlasses () {
   // Return everything from the `glasses` table
-  return knex('glassses')
+  return knex
+  .select()
+  .table('glasses')
 }
 
 function getAllGlassesWithCocktails () {
