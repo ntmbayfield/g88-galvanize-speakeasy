@@ -13,10 +13,8 @@ function getAllGlassesWithCocktails () {
     Join glasses with cocktails -- do not worry about
     nesting the data in a particular way
   */
-  knex
-    .select('*')
-    .table('glasses')
-    .leftJoin('cocktails', 'glasses.id', 'cockyails.id')
+  return knex('glasses')
+    .join('cocktails', 'cocktails.glass_id', 'glasses.id');
 }
 
 function getAllGlassesWithCocktailsNested () {
@@ -32,6 +30,22 @@ function getAllGlassesWithCocktailsNested () {
       ]
     }
   */
+
+  //select all glasses
+  return knex('glasses')
+    .then(allGlasses => {
+      const promises = allGlasses.map(glass => {
+        return knex('cocktails')
+          .where({
+            glass_id: glass.id
+          })
+          .then(allCocktails => {
+            glass.cocktails = allCocktails;
+            return glass;
+          })
+      })
+    return Promise.all(promises)
+    })
 }
 
 function getCocktailsAndIngredients () {
